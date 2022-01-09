@@ -1,4 +1,4 @@
-import * as uws from "./uws/uws";
+import * as uws from "../uws/uws";
 import dotenv from "dotenv";
 import SocketManager from "./sockets-manager";
 import { TextDecoder } from "util";

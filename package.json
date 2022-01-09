@@ -8,6 +8,7 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "make": "tsc"
+    "make": "tsc",
+    "test": "npm run make && node ./dist/index.js"
   }
 }
