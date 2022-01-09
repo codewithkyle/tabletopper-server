@@ -4,13 +4,15 @@ import { Socket } from "./globals";
 class Room {
     public id: string;
     public code: string;
+    public gmId: string;
     private sockets: {
         [id:string]: Socket,
     };
 
-    constructor(code:string, id: string){
+    constructor(code:string, id: string, gmId:string){
         this.code = code;
         this.id = id;
+        this.gmId = gmId;
         this.sockets = {};
     }
 
@@ -25,6 +27,10 @@ class Room {
         if (Object.keys(this.sockets).length === 0){
             gm.removeRoom(this.code);
         }
+    }
+
+    public updateGM(ws:Socket){
+        this.gmId = ws.id;
     }
 }
 export default Room;

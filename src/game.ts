@@ -19,6 +19,9 @@ class GameManager {
     public connect(ws):void{
         ws.id = uuid();
         this.sockets[ws.id] = ws;
+        this.send(ws, "core:init", {
+            id: ws.id,
+        });
     }
 
     public disconnect(ws:Socket):void{
@@ -33,6 +36,11 @@ class GameManager {
     public message(ws:Socket, message):void{
         const { type, data } = message;
         switch (type){
+            case "core:sync":
+                if (data.room !== null && data.room in this.rooms && data.prevId === this.rooms[data.room].gmId){
+                    this.rooms[data.room].updateGM(ws);
+                }
+                break;
             case "create:room":
                 this.createRoom(ws); 
                 break;
@@ -54,7 +62,8 @@ class GameManager {
         do {
             code = GenerateCode();
         } while (code in this.rooms)
-        const room = new Room(code, uuid());
+        const room = new Room(code, uuid(), ws.id);
+        room.addSocket(ws);
         this.rooms[code] = room;
         ws.room = code;
         this.send(ws, "room:join", {
