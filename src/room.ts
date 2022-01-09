@@ -34,5 +34,22 @@ class Room {
     public updateGM(ws:Socket){
         this.gmId = ws.id;
     }
+
+    public lock(ws:Socket):void{
+        if (ws.id === this.gmId){
+            this.locked = true;
+        }
+        else {
+            gm.error(ws, "Action Failed", "Only the Game Master can lock the room.");
+        }
+    }
+
+    public unlock(ws:Socket):void{
+        if (ws.id === this.gmId){
+            this.locked = false;
+        } else {
+            gm.error(ws, "Action Failed", "Only the Game Master can unlock the room.");
+        }
+    }
 }
 export default Room;

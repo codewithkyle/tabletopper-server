@@ -35,17 +35,29 @@ class GameManager {
 
     public message(ws:Socket, message):void{
         const { type, data } = message;
+        const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:unlock":
+                if (room){
+                    room.unlock(ws);
+                } else {
+                    this.error(ws, "Action Failed", "You cannot unlock a room that doesn't exist.");
+                }
+                break;
+            case "room:lock":
+                if (room){
+                    room.lock(ws);
+                } else {
+                    this.error(ws, "Action Failed", "You cannot lock a room that doesn't exist.");
+                }
+                break;
             case "core:sync":
                 if (data.room !== null && data.room in this.rooms && data.prevId === this.rooms[data.room].gmId){
                     this.rooms[data.room].updateGM(ws);
                 }
                 else if (data.room !== null && data.room in this.rooms){
                     if (this.rooms[data.room].locked){
-                        this.send(ws, "core:error", {
-                            title: "Room Locked",
-                            message: "Failed to reconnect. Ask the Game Master to unlock the room.",
-                        });
+                        this.error(ws, "Room Locked", "Failed to reconnect. Ask the Game Master to unlock the room.");
                     }
                     else {
                         this.rooms[data.room].addSocket(ws);
@@ -66,6 +78,13 @@ class GameManager {
             type: type,
             data: data,
         }));
+    }
+
+    public error(ws:Socket, title:string, message:string):void{
+        this.send(ws, "core:error", {
+            title: title,
+            message: message,
+        });
     }
 
     public createRoom(ws:Socket):void{
