@@ -37,6 +37,19 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:check":
+                const code = data.code;
+                if (code in this.rooms){
+                   if (this.rooms[code].locked){
+                        this.error(ws, "Room Locked", `Room ${code} is locked. Ask the Game Master to unlock the room and try again.`);
+                   } else {
+                        ws.room = code;
+                        this.send(ws, "character:getDetails");
+                   }
+                } else {
+                    this.error(ws, "Action Failed", `Room ${code} is no longer available.`);
+                }
+                break;
             case "room:unlock":
                 if (room){
                     room.unlock(ws);
