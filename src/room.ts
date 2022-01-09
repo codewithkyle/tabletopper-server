@@ -8,12 +8,14 @@ class Room {
     private sockets: {
         [id:string]: Socket,
     };
+    public locked:boolean;
 
     constructor(code:string, id: string, gmId:string){
         this.code = code;
         this.id = id;
         this.gmId = gmId;
         this.sockets = {};
+        this.locked = false;
     }
 
     public addSocket(ws:Socket):void{

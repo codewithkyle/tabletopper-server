@@ -40,6 +40,17 @@ class GameManager {
                 if (data.room !== null && data.room in this.rooms && data.prevId === this.rooms[data.room].gmId){
                     this.rooms[data.room].updateGM(ws);
                 }
+                else if (data.room !== null && data.room in this.rooms){
+                    if (this.rooms[data.room].locked){
+                        this.send(ws, "core:error", {
+                            title: "Room Locked",
+                            message: "Failed to reconnect. Ask the Game Master to unlock the room.",
+                        });
+                    }
+                    else {
+                        this.rooms[data.room].addSocket(ws);
+                    }
+                }
                 break;
             case "create:room":
                 this.createRoom(ws); 
