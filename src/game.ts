@@ -37,6 +37,15 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:join":
+                if (room){
+                    room.addSocket(ws);
+                    // TODO: do something with data.token and data.name
+                }
+                else {
+                    this.error(ws, "Failed to Join", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:check":
                 const code = data.code;
                 if (code in this.rooms){
@@ -109,10 +118,6 @@ class GameManager {
         room.addSocket(ws);
         this.rooms[code] = room;
         ws.room = code;
-        this.send(ws, "room:join", {
-            code: code,
-            id: room.id,
-        });
     }
 
     public removeRoom(code:string):void{

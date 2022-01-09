@@ -20,6 +20,10 @@ class Room {
 
     public addSocket(ws:Socket):void{
         this.sockets[ws.id] = ws;
+        gm.send(ws, "room:join", {
+            code: this.code,
+            id: this.id,
+        });
     }
 
     public removeSocket(ws:Socket):void{
