@@ -1,3 +1,4 @@
+import logger from "./lumberjack.js";
 import gm from "./game.js";
 import type { Socket } from "./globals";
 
@@ -16,6 +17,13 @@ class Room {
         this.gmId = gmId;
         this.sockets = {};
         this.locked = false;
+    }
+
+    public op(op):void{
+        logger.write(op, this.code);
+        for (const socket in this.sockets){
+            gm.send(this.sockets[socket], "room:op", op);
+        }
     }
 
     public addSocket(ws:Socket):void{
