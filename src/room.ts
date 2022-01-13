@@ -26,6 +26,12 @@ class Room {
         }
     }
 
+    public broadcast(type: string, data = null):void{
+        for (const socket in this.sockets){
+            gm.send(this.sockets[socket], type, data);
+        }
+    }
+
     public addSocket(ws:Socket, data = null):void{
         this.sockets[ws.id] = ws;
         gm.send(ws, "room:join", {
@@ -36,10 +42,13 @@ class Room {
             this.op(data.token);
         }
         if (data?.name){
-            this.op(data.name);
+            ws.name = data.name;
+            this.op(data.nameOP);
+        } else {
+            ws.name = "Game Master";
         }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
-        // TODO: announce join
+        this.broadcast("room:announce:join", `${ws.name} joined the room.`);
     }
 
     public removeSocket(ws:Socket):void{
@@ -47,7 +56,7 @@ class Room {
             delete this.sockets[ws.id];
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
-        // TODO: announce abandon
+        this.broadcast("room:announce:leave", `${ws.name} left the room.`)
         if (Object.keys(this.sockets).length === 0){
             gm.removeRoom(this.code);
         }
