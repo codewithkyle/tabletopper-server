@@ -49,8 +49,7 @@ class GameManager {
                 break;
             case "room:join":
                 if (room){
-                    room.addSocket(ws);
-                    // TODO: do something with data.token and data.name
+                    room.addSocket(ws, data);
                 }
                 else {
                     this.error(ws, "Failed to Join", `Room ${ws.room} is no longer available.`);

@@ -26,13 +26,20 @@ class Room {
         }
     }
 
-    public addSocket(ws:Socket):void{
+    public addSocket(ws:Socket, data = null):void{
         this.sockets[ws.id] = ws;
         gm.send(ws, "room:join", {
             code: this.code,
             id: this.id,
         });
+        if (data?.token){
+            this.op(data.token);
+        }
+        if (data?.name){
+            this.op(data.name);
+        }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
+        // TODO: announce join
     }
 
     public removeSocket(ws:Socket):void{
@@ -40,6 +47,7 @@ class Room {
             delete this.sockets[ws.id];
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
+        // TODO: announce abandon
         if (Object.keys(this.sockets).length === 0){
             gm.removeRoom(this.code);
         }
