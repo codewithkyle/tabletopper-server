@@ -9,6 +9,6 @@
   },
   "scripts": {
     "make": "tsc",
-    "test": "npm run make && node ./dist/index.js"
+    "test": "rm -rf ./dist && npm run make && node ./build/mover.js && node ./dist/src/index.js"
   }
 }

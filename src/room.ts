@@ -1,5 +1,5 @@
-import gm from "./game";
-import { Socket } from "./globals";
+import gm from "./game.js";
+import type { Socket } from "./globals";
 
 class Room {
     public id: string;
@@ -24,11 +24,13 @@ class Room {
             code: this.code,
             id: this.id,
         });
+        console.log(`Socket ${ws.id} joined room ${this.code}`);
     }
 
     public removeSocket(ws:Socket):void{
         if (ws.id in this.sockets){
             delete this.sockets[ws.id];
+            console.log(`Socket ${ws.id} left room ${this.code}`);
         }
         if (Object.keys(this.sockets).length === 0){
             gm.removeRoom(this.code);
@@ -37,6 +39,7 @@ class Room {
 
     public updateGM(ws:Socket){
         this.gmId = ws.id;
+        console.log(`Updated room ${this.code} GM to ${ws.id}`);
     }
 
     public lock(ws:Socket):void{

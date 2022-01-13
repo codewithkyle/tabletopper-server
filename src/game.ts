@@ -1,7 +1,8 @@
+import logger from "./lumberjack.js";
 import { v4 as uuid } from "uuid";
-import { Socket } from "./globals";
-import Room from "./room";
-import { GenerateCode } from "./utils";
+import { Socket } from "./globals.js";
+import Room from "./room.js";
+import { GenerateCode } from "./utils.js";
 
 class GameManager {
     private sockets: {
@@ -22,6 +23,7 @@ class GameManager {
         this.send(ws, "core:init", {
             id: ws.id,
         });
+        console.log(`Socket connected: ${ws.id}`);
     }
 
     public disconnect(ws:Socket):void{
@@ -30,6 +32,7 @@ class GameManager {
                 this.rooms[ws.room].removeSocket(ws);
             }
             delete this.sockets[ws.id];
+            console.log(`Socket disconnected: ${ws.id}`);
         }
     }
 
@@ -118,10 +121,14 @@ class GameManager {
         room.addSocket(ws);
         this.rooms[code] = room;
         ws.room = code;
+        console.log(`Socket ${ws.id} created room ${code}`);
+        logger.touch(code);
     }
 
     public removeRoom(code:string):void{
         delete this.rooms[code];
+        console.log(`Room ${code} was removed`);
+        logger.delete(code);
     }
 }
 const gm = new GameManager();

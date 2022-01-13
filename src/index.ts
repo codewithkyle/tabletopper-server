@@ -1,6 +1,6 @@
-import * as uws from "../uws/uws";
+import * as uws from "../uws/uws.js";
 import dotenv from "dotenv";
-import gm from "./game";
+import gm from "./game.js";
 import { TextDecoder } from "util";
 
 const decoder = new TextDecoder("utf-8");
@@ -8,9 +8,11 @@ dotenv.config();
 const port = process.env.PORT;
 let app;
 if (process.env.ENV === "dev"){
+    // @ts-ignore
     app = uws.App();
 }
 else {
+    // @ts-ignore
     app = uws.SSLApp({
         key_file_name: process.env.KEY,
         cert_file_name: process.env.CERT,
@@ -18,6 +20,7 @@ else {
 }
 
 app.ws("/*", {
+    // @ts-ignore
     compression: uws.SHARED_COMPRESSOR,
     maxPayloadLength: 16 * 1024 * 1024,
     idleTimeout: 32,
