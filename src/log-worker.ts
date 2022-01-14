@@ -1,4 +1,4 @@
-import { rm, writeFile } from "fs/promises";
+import { unlink, writeFile } from "fs/promises";
 import path from "path";
 import { parentPort } from "worker_threads";
 
@@ -14,7 +14,7 @@ parentPort.on("message", async (e) => {
                 await writeFile(location, data, { encoding:"utf-8", flag: "a"});
                 break;
             case "delete":
-                await rm(location);
+                await unlink(location);
                 break;
             default:
                 break;
