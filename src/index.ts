@@ -22,7 +22,7 @@ else {
 app.ws("/*", {
     // @ts-ignore
     compression: uws.SHARED_COMPRESSOR,
-    maxPayloadLength: 16 * 1024 * 1024,
+    maxPayloadLength: 100 * 1024 * 1024,
     idleTimeout: 32,
     open: (ws) => {
         gm.connect(ws);
