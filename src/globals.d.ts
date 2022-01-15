@@ -34,3 +34,4 @@ export interface Batch extends OPCode{
     ops: Array<OPCode>,
 }
 
+export type ExitReason = "UNKNOWN" | "KICKED" | "DC" | "QUIT";

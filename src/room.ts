@@ -1,6 +1,6 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
-import type { Socket } from "./globals";
+import type { ExitReason, Socket } from "./globals";
 import { set, batch, del } from "./control-center.js";
 
 class Room {
@@ -119,7 +119,7 @@ class Room {
         }
     }
 
-    public removeSocket(ws:Socket):void{
+    public removeSocket(ws:Socket, reason: ExitReason = "UNKNOWN"):void{
         if (ws.id in this.sockets){
             this.deadPlayers[ws.id] = {
                 name: ws.name,
@@ -131,7 +131,17 @@ class Room {
             }
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
-        this.broadcast("room:announce:leave", `${ws.name} left the room.`)
+        switch (reason){
+            case "QUIT":
+                this.broadcast("room:announce:quit", `${ws.name} has left the room.`);
+                break;
+            case "KICKED":
+                this.broadcast("room:announce:kick", `${ws.name} has been kicked from the room.`);
+                break;
+            default:
+                this.broadcast("room:announce:dc", `${ws.name} was disconnected.`);
+                break;
+        }
         if (Object.keys(this.sockets).length === 0){
             gm.removeRoom(this.code);
         }

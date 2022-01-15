@@ -78,6 +78,11 @@ class GameManager {
                     this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
                 }
                 break;
+            case "room:quit":
+                if (room){
+                    room.removeSocket(ws, "QUIT");
+                }
+                break;
             case "room:join":
                 if (room){
                     room.addSocket(ws, data);
