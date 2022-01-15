@@ -1,7 +1,7 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
 import type { Socket } from "./globals";
-import { set, batch } from "./control-center.js";
+import { set, batch, del } from "./control-center.js";
 
 class Room {
     public id: string;
@@ -12,6 +12,11 @@ class Room {
     };
     public locked:boolean;
     private map: string;
+    private deadPlayers: {
+        [id:string]: {
+            name: string,
+        }
+    };
 
     constructor(code:string, id: string, gmId:string){
         this.code = code;
@@ -20,6 +25,7 @@ class Room {
         this.sockets = {};
         this.locked = false;
         this.map = null;
+        this.deadPlayers = {};
     }
 
     public clearMap():void{
@@ -67,6 +73,28 @@ class Room {
         }
     }
 
+    public resetSocket(ws:Socket, lastId: string):void{
+        if (lastId in this.deadPlayers){
+            ws.room = this.code;
+            gm.reconnect(ws, ws.id, lastId);
+            this.sockets[ws.id] = ws;
+            ws.name = this.deadPlayers[ws.id].name;
+            delete this.deadPlayers[ws.id];
+            console.log(`Socket ${ws.id} reconnected to ${this.code}`);
+            gm.send(ws, "room:join", {
+                code: this.code,
+                id: this.id,
+            });
+            this.broadcast("room:announce:reconnect", `${ws.name} has returned.`);
+            if (ws.id !== this.gmId){
+                const op = set("players", ws.id, "active", true);
+                this.dispatch(op);
+            }
+        } else {
+            // Player wasn't dead...
+        }
+    }
+
     public addSocket(ws:Socket, data = null):void{
         this.sockets[ws.id] = ws;
         gm.send(ws, "room:join", {
@@ -92,10 +120,15 @@ class Room {
 
     public removeSocket(ws:Socket):void{
         if (ws.id in this.sockets){
-            const op = set("players", ws.id, "active", false);
+            this.deadPlayers[ws.id] = {
+                name: ws.name,
+            };
             delete this.sockets[ws.id];
+            if (ws.id !== this.gmId){
+                const op = set("players", ws.id, "active", false);
+                this.dispatch(op);
+            }
             console.log(`Socket ${ws.id} left room ${this.code}`);
-            this.dispatch(op);
         }
         this.broadcast("room:announce:leave", `${ws.name} left the room.`)
         if (Object.keys(this.sockets).length === 0){

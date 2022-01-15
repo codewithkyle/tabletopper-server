@@ -26,6 +26,16 @@ class GameManager {
         console.log(`Socket connected: ${ws.id}`);
     }
 
+    public reconnect(ws, currentId, actualId):void{
+        delete this.sockets[currentId];
+        ws.id = actualId;
+        this.sockets[ws.id] = ws;
+        this.send(ws, "core:init", {
+            id: ws.id,
+        });
+        console.log(`Socket reconnected: ${ws.id}`);
+    }
+
     public disconnect(ws:Socket):void{
         if (ws.id in this.sockets){
             if (ws.room && ws.room in this.rooms){
@@ -108,12 +118,7 @@ class GameManager {
                     this.rooms[data.room].updateGM(ws);
                 }
                 else if (data.room !== null && data.room in this.rooms){
-                    if (this.rooms[data.room].locked){
-                        this.error(ws, "Room Locked", "Failed to reconnect. Ask the Game Master to unlock the room.");
-                    }
-                    else {
-                        this.rooms[data.room].addSocket(ws);
-                    }
+                    this.rooms[data.room].resetSocket(ws, data.prevId);
                 }
                 break;
             case "create:room":
