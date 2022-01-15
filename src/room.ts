@@ -92,6 +92,7 @@ class Room {
             }
         } else {
             // Player wasn't dead...
+            gm.send(ws, "core:sync:fail");
         }
     }
 

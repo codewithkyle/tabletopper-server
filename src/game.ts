@@ -114,11 +114,11 @@ class GameManager {
                 }
                 break;
             case "core:sync":
-                if (data.room !== null && data.room in this.rooms && data.prevId === this.rooms[data.room].gmId){
-                    this.rooms[data.room].updateGM(ws);
-                }
-                else if (data.room !== null && data.room in this.rooms){
+                if (data.room !== null && data.room in this.rooms){
                     this.rooms[data.room].resetSocket(ws, data.prevId);
+                }
+                else {
+                    this.send(ws, "core:sync:fail");
                 }
                 break;
             case "create:room":
