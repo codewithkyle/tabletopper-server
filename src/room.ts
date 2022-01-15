@@ -1,6 +1,7 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
 import type { Socket } from "./globals";
+import { set } from "./control-center.js";
 
 class Room {
     public id: string;
@@ -19,7 +20,24 @@ class Room {
         this.locked = false;
     }
 
-    public op(op):void{
+    public clearPawns():void{
+        const op = set("games", this.code, "players", []);
+        this.dispatch(op);
+    }
+
+    public spawnPlayers():void{
+        const ids = [];
+        for (const id in this.sockets){
+            if (id !== this.gmId){
+                ids.push(id);
+            }
+        }
+        console.log(`Room ${this.code} is spawning players`);
+        const op = set("games", this.code, "players", ids);
+        this.dispatch(op);
+    }
+
+    public dispatch(op):void{
         logger.write(op, this.code);
         for (const socket in this.sockets){
             gm.send(this.sockets[socket], "room:op", op);
@@ -39,11 +57,12 @@ class Room {
             id: this.id,
         });
         if (data?.token){
-            this.op(data.token);
+            this.dispatch(data.token);
         }
         if (data?.name){
             ws.name = data.name;
-            this.op(data.nameOP);
+            data.player.value.room = this.code;
+            this.dispatch(data.player);
         } else {
             ws.name = "Game Master";
         }
