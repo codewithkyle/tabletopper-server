@@ -2,6 +2,10 @@ import * as uws from "../uws/uws.js";
 import dotenv from "dotenv";
 import gm from "./game.js";
 import { TextDecoder } from "util";
+import path from "path";
+import { stat } from "fs/promises";
+import { createReadStream, existsSync, statSync } from "fs";
+import { pipeStreamOverResponse, setHeaders } from "./utils.js";
 
 const decoder = new TextDecoder("utf-8");
 dotenv.config();
@@ -40,6 +44,51 @@ app.ws("/*", {
     close: (ws) => {
         gm.disconnect(ws);
     },
+});
+
+app.any("/", async (res, req) => {
+    setHeaders(res);
+    res.writeStatus("200 OK");
+    res.end();
+})
+
+app.head("/room/:code", (res, req) => {
+    const code = req.getParameter(0);
+    const location = path.join(__dirname, "logs", `${code}.ndjson`);
+    if (existsSync(location)){
+        const totalSize = statSync(location).size;
+        if (totalSize > 0){
+            res.writeStatus("200 OK");
+        } else {
+            res.writeStatus("204 No Content");
+        }
+    } else {
+        res.writeStatus("404 Not Found");
+    }
+    setHeaders(res);
+    res.end();
+});
+
+app.get("/room/:code", (res, req) => {
+    const code = req.getParameter(0);
+    const location = path.join(__dirname, "logs", `${code}.ndjson`);
+    let fail = true;
+    if (existsSync(location)){
+        const totalSize = statSync(location).size;
+        if (totalSize > 0){
+            fail = false;
+            const readstream = createReadStream(location);
+            pipeStreamOverResponse(res, readstream, totalSize);
+        } else {
+            res.writeStatus("204 No Content");
+        }
+    } else {
+        res.writeStatus("404 Not Found");
+    }
+    setHeaders(res);
+    if (fail){
+        res.end();
+    }
 });
 
 app.listen("0.0.0.0", port, {}, (token) => {});
