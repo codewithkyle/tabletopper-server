@@ -11,6 +11,7 @@ class Room {
         [id:string]: Socket,
     };
     public locked:boolean;
+    private map: string;
 
     constructor(code:string, id: string, gmId:string){
         this.code = code;
@@ -18,19 +19,26 @@ class Room {
         this.gmId = gmId;
         this.sockets = {};
         this.locked = false;
+        this.map = null;
     }
 
-    public spawnPlayers():void{
+    public setMap(map:string):void{
+        this.map = map;
+        const op = set("games", this.code, "map", map);
+        this.dispatch(op);
+    }
+
+    public spawnPlayers(resetPostions = true):void{
         const ids = [];
         for (const id in this.sockets){
             if (id !== this.gmId){
                 ids.push(id);
-
-                // Reset player positions
-                const op1 = set("players", id, "x", 0);
-                const op2 = set("players", id, "y", 0);
-                const ops = batch("players", id, [op1, op2]);
-                this.dispatch(ops);
+                if (resetPostions){
+                    const op1 = set("players", id, "x", 0);
+                    const op2 = set("players", id, "y", 0);
+                    const ops = batch("players", id, [op1, op2]);
+                    this.dispatch(ops);
+                }
             }
         }
         console.log(`Room ${this.code} is spawning players`);
@@ -69,12 +77,17 @@ class Room {
         }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
         this.broadcast("room:announce:join", `${ws.name} joined the room.`);
+        if (this.map){
+            this.spawnPlayers(false);
+        }
     }
 
     public removeSocket(ws:Socket):void{
         if (ws.id in this.sockets){
+            const op = set("players", ws.id, "active", false);
             delete this.sockets[ws.id];
             console.log(`Socket ${ws.id} left room ${this.code}`);
+            this.dispatch(op);
         }
         this.broadcast("room:announce:leave", `${ws.name} left the room.`)
         if (Object.keys(this.sockets).length === 0){
