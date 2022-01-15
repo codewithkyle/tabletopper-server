@@ -20,12 +20,6 @@ class Room {
         this.locked = false;
     }
 
-    public clearPawns():void{
-        const op = set("games", this.code, "players", []);
-        console.log(`Room ${this.code} cleared pawns`);
-        this.dispatch(op);
-    }
-
     public spawnPlayers():void{
         const ids = [];
         for (const id in this.sockets){
