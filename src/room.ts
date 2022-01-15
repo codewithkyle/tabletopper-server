@@ -22,6 +22,14 @@ class Room {
         this.map = null;
     }
 
+    public clearMap():void{
+        this.map = null;
+        const op = set("games", this.code, "map", null);
+        const op2 = set("games", this.code, "players", []);
+        const ops = batch("games", this.code, [op, op2]);
+        this.dispatch(ops);
+    }
+
     public setMap(map:string):void{
         this.map = map;
         const op = set("games", this.code, "map", map);

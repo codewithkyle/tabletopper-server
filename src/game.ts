@@ -40,6 +40,13 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:tabletop:map:clear":
+                if (room){
+                    room.clearMap();
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:tabletop:map:load":
                 if (room){
                     room.setMap(data);
