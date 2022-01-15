@@ -1,7 +1,7 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
 import type { Socket } from "./globals";
-import { set } from "./control-center.js";
+import { set, batch } from "./control-center.js";
 
 class Room {
     public id: string;
@@ -22,6 +22,7 @@ class Room {
 
     public clearPawns():void{
         const op = set("games", this.code, "players", []);
+        console.log(`Room ${this.code} cleared pawns`);
         this.dispatch(op);
     }
 
@@ -30,6 +31,12 @@ class Room {
         for (const id in this.sockets){
             if (id !== this.gmId){
                 ids.push(id);
+
+                // Reset player positions
+                const op1 = set("players", id, "x", 0);
+                const op2 = set("players", id, "y", 0);
+                const ops = batch("players", id, [op1, op2]);
+                this.dispatch(ops);
             }
         }
         console.log(`Room ${this.code} is spawning players`);
