@@ -155,6 +155,7 @@ class Room {
     public lock(ws:Socket):void{
         if (ws.id === this.gmId){
             this.locked = true;
+            gm.send(this.sockets[this.gmId], "room:announce:lock");
         }
         else {
             gm.error(ws, "Action Failed", "Only the Game Master can lock the room.");
@@ -164,7 +165,9 @@ class Room {
     public unlock(ws:Socket):void{
         if (ws.id === this.gmId){
             this.locked = false;
-        } else {
+            gm.send(this.sockets[this.gmId], "room:announce:unlock");
+        }
+        else {
             gm.error(ws, "Action Failed", "Only the Game Master can unlock the room.");
         }
     }
