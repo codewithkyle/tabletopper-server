@@ -39,7 +39,7 @@ class GameManager {
     public disconnect(ws:Socket):void{
         if (ws.id in this.sockets){
             if (ws.room && ws.room in this.rooms){
-                this.rooms[ws.room].removeSocket(ws);
+                this.rooms[ws.room].removeSocket(ws, "DC");
             }
             delete this.sockets[ws.id];
             console.log(`Socket disconnected: ${ws.id}`);
@@ -50,6 +50,13 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:player:ban":
+                if (room){
+                    room.kickPlayer(data);
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:tabletop:map:clear":
                 if (room){
                     room.clearMap();

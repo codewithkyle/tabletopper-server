@@ -27,6 +27,13 @@ class Room {
         this.map = null;
         this.deadPlayers = {};
     }
+    
+    public kickPlayer(id:string):void{
+        if(id in this.sockets){
+            gm.send(this.sockets[id], "room:ban");
+            this.removeSocket(this.sockets[id], "KICKED");
+        }
+    }
 
     public clearMap():void{
         this.map = null;
@@ -138,8 +145,10 @@ class Room {
             case "KICKED":
                 this.broadcast("room:announce:kick", `${ws.name} has been kicked from the room.`);
                 break;
-            default:
+            case "DC":
                 this.broadcast("room:announce:dc", `${ws.name} was disconnected.`);
+                break;
+            default:
                 break;
         }
         if (Object.keys(this.sockets).length === 0){
