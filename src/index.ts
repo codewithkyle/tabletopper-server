@@ -26,7 +26,8 @@ else {
 app.ws("/*", {
     // @ts-ignore
     compression: uws.SHARED_COMPRESSOR,
-    maxPayloadLength: 100 * 1024 * 1024,
+    maxPayloadLength: 150 * 1024 * 1024,
+    maxBackpressure: 150 * 1024 * 1024,
     idleTimeout: 32,
     open: (ws) => {
         gm.connect(ws);
@@ -37,9 +38,6 @@ app.ws("/*", {
         } catch (e){
             // Log error
         }
-    },
-    drain: (ws) => {
-        console.log('WebSocket backpressure: ' + ws.getBufferedAmount());
     },
     close: (ws) => {
         gm.disconnect(ws);
