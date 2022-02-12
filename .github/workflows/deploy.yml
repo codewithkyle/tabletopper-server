@@ -39,7 +39,7 @@ jobs:
                   script: sudo chown -R $USER:$USER ~/server
 
             - name: Deploy
-              run: rsync -azh --delete-after --exclude={'.git','.env','.github','.gitignore','tsconfig.json','package.json','package-lock.json','/src','/build'} -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:~/server
+              run: rsync -azh --delete-after --exclude={'.git','.env','.github','.gitignore','tsconfig.json','/src','/build'} -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:~/server
 
             - name: Post Deployment
               uses: appleboy/ssh-action@master
