@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import gm from "./game.js";
 import { TextDecoder } from "util";
 import path from "path";
-import { stat } from "fs/promises";
 import { createReadStream, existsSync, statSync } from "fs";
 import { pipeStreamOverResponse, setHeaders } from "./utils.js";
 
