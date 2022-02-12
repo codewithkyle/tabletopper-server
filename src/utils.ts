@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 export function RandomInt(min:number, max:number):number{
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -83,6 +86,6 @@ export function pipeStreamOverResponse(res, readStream, totalSize) {
 }
 
 export function setHeaders(res):void{
-    res.writeHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.writeHeader("Access-Control-Allow-Origin", process.env.ORIGIN);
     res.writeHeader("Access-Control-Allow-Credentials", "true");
 }

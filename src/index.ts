@@ -88,4 +88,4 @@ app.get("/room/:code", (res, req) => {
     }
 });
 
-app.listen("0.0.0.0", port, {}, (token) => {});
+app.listen("127.0.0.1", port, {}, (token) => {});
