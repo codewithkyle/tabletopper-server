@@ -35,7 +35,10 @@ class Room {
         }
     }
 
-    public clearMap():void{
+    public async clearMap():Promise<void>{
+        this.broadcast("room:tabletop:clear");
+        await logger.delete(this.code);
+        await logger.touch(this.code);
         this.map = null;
         const op = set("games", this.code, "map", null);
         const op2 = set("games", this.code, "players", []);
