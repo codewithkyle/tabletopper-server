@@ -58,11 +58,11 @@ class Room {
 
     public spawnPlayers(resetPostions = true):void{
         const ids = [];
-        this.pawns = [];
-        for (const id in this.sockets){
-            if (id !== this.gmId){
-                ids.push(id);
-                if (resetPostions){
+        if (resetPostions){
+            this.pawns = [];
+            for (const id in this.sockets){
+                if (id !== this.gmId){
+                    ids.push(id);
                     const pawn:Pawn = {
                         uid: randomUUID(),
                         x: 0,
@@ -138,7 +138,16 @@ class Room {
         }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
         this.broadcast("room:announce:join", `${ws.name} joined the room.`);
-        if (this.map){
+        if (this.pawns.length){
+            const pawn:Pawn = {
+                uid: randomUUID(),
+                x: 0,
+                y: 0,
+                room: this.code,
+                playerId: ws.id,
+                name: ws.name,
+            };
+            this.pawns.push(pawn);
             this.spawnPlayers(false);
         }
     }
@@ -157,6 +166,7 @@ class Room {
                         if (this.pawns[i]?.playerId === ws.id){
                             const op2 = del("pawns", this.pawns[i].uid);
                             this.dispatch(op2);
+                            this.pawns.splice(i, 1);
                             break;
                         }
                     }
