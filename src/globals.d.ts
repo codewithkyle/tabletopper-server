@@ -35,3 +35,14 @@ export interface Batch extends OPCode{
 }
 
 export type ExitReason = "UNKNOWN" | "KICKED" | "DC" | "QUIT";
+
+export type Pawn = {
+    x: number,
+    y: number,
+    uid: string,
+    playerId?: string|null,
+    monsterId?: string|null,
+    token?: string|null,
+    name: string,
+    room: string,
+}

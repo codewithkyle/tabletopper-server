@@ -1,7 +1,8 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
-import type { ExitReason, Socket } from "./globals";
-import { set, batch, del } from "./control-center.js";
+import type { ExitReason, Socket, Pawn } from "./globals";
+import { set, batch, del, insert } from "./control-center.js";
+import {randomUUID} from "crypto";
 
 class Room {
     public id: string;
@@ -17,6 +18,7 @@ class Room {
             name: string,
         }
     };
+    public pawns: Array<Pawn>;
 
     constructor(code:string, id: string, gmId:string){
         this.code = code;
@@ -26,6 +28,7 @@ class Room {
         this.locked = false;
         this.map = null;
         this.deadPlayers = {};
+        this.pawns = [];
     }
     
     public kickPlayer(id:string):void{
@@ -40,6 +43,7 @@ class Room {
         await logger.delete(this.code);
         await logger.touch(this.code);
         this.map = null;
+        this.pawns = [];
         const op = set("games", this.code, "map", null);
         const op2 = set("games", this.code, "players", []);
         const ops = batch("games", this.code, [op, op2]);
@@ -54,17 +58,24 @@ class Room {
 
     public spawnPlayers(resetPostions = true):void{
         const ids = [];
+        this.pawns = [];
         for (const id in this.sockets){
             if (id !== this.gmId){
                 ids.push(id);
                 if (resetPostions){
-                    const op1 = set("players", id, "x", 0);
-                    const op2 = set("players", id, "y", 0);
-                    const ops = batch("players", id, [op1, op2]);
-                    this.dispatch(ops);
+                    const pawn:Pawn = {
+                        uid: randomUUID(),
+                        x: 0,
+                        y: 0,
+                        room: this.code,
+                        playerId: id,
+                        name: this.sockets[id].name,
+                    };
+                    this.pawns.push(pawn);
                 }
             }
         }
+        this.broadcast("room:tabletop:spawn:pawns", this.pawns);
         console.log(`Room ${this.code} is spawning players`);
         const op = set("games", this.code, "players", ids);
         this.dispatch(op);
@@ -99,6 +110,9 @@ class Room {
             if (ws.id !== this.gmId){
                 const op = set("players", ws.id, "active", true);
                 this.dispatch(op);
+            }
+            if (this.pawns.length){
+                this.broadcast("room:tabletop:spawn:pawns", this.pawns);
             }
         } else {
             // Player wasn't dead...
