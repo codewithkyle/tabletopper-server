@@ -152,6 +152,15 @@ class Room {
             if (ws.id !== this.gmId){
                 const op = set("players", ws.id, "active", false);
                 this.dispatch(op);
+                if (reason === "KICKED" || reason === "QUIT"){
+                    for (let i = 0; i < this.pawns.length; i++){
+                        if (this.pawns[i]?.playerId === ws.id){
+                            const op2 = del("pawns", this.pawns[i].uid);
+                            this.dispatch(op2);
+                            break;
+                        }
+                    }
+                }
             }
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
