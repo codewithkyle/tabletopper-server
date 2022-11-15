@@ -18,7 +18,7 @@ class Room {
             name: string,
         }
     };
-    public pawns: Array<Pawn>;
+    public showPawns: boolean;
 
     constructor(code:string, id: string, gmId:string){
         this.code = code;
@@ -28,7 +28,7 @@ class Room {
         this.locked = false;
         this.map = null;
         this.deadPlayers = {};
-        this.pawns = [];
+        this.showPawns = false;
     }
     
     public kickPlayer(id:string):void{
@@ -43,7 +43,7 @@ class Room {
         await logger.delete(this.code);
         await logger.touch(this.code);
         this.map = null;
-        this.pawns = [];
+        this.showPawns = false;
         const op = set("games", this.code, "map", null);
         const op2 = set("games", this.code, "players", []);
         const ops = batch("games", this.code, [op, op2]);
@@ -56,26 +56,40 @@ class Room {
         this.dispatch(op);
     }
 
-    public spawnPlayers(resetPostions = true):void{
+    public spawnMonster({ index, x, y, name }){
+        if (this.map !== null){
+            const id = randomUUID();
+            const pawn:Pawn = {
+                uid: id,
+                x: 0,
+                y: 0,
+                room: this.code,
+                monsterId: index,
+                name: name,
+            };
+            const op = insert("pawns", id, pawn);
+            console.log(`Room ${this.code} is spawning a ${index}`);
+            this.dispatch(op);
+        }
+    }
+
+    public spawnPlayers():void{
+        this.showPawns = true;
         const ids = [];
-        if (resetPostions){
-            this.pawns = [];
-            for (const id in this.sockets){
-                if (id !== this.gmId){
-                    ids.push(id);
-                    const pawn:Pawn = {
-                        uid: randomUUID(),
-                        x: 0,
-                        y: 0,
-                        room: this.code,
-                        playerId: id,
-                        name: this.sockets[id].name,
-                    };
-                    this.pawns.push(pawn);
-                }
+        for (const id in this.sockets){
+            if (id !== this.gmId){
+                ids.push(id);
+                const pawn:Pawn = {
+                    uid: randomUUID(),
+                    x: 0,
+                    y: 0,
+                    room: this.code,
+                    playerId: id,
+                    name: this.sockets[id].name,
+                };
+                this.dispatch(insert("pawns", id, pawn));
             }
         }
-        this.broadcast("room:tabletop:spawn:pawns", this.pawns);
         console.log(`Room ${this.code} is spawning players`);
         const op = set("games", this.code, "players", ids);
         this.dispatch(op);
@@ -111,9 +125,6 @@ class Room {
                 const op = set("players", ws.id, "active", true);
                 this.dispatch(op);
             }
-            if (this.pawns.length){
-                this.broadcast("room:tabletop:spawn:pawns", this.pawns);
-            }
         } else {
             // Player wasn't dead...
             gm.send(ws, "core:sync:fail");
@@ -138,7 +149,7 @@ class Room {
         }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
         this.broadcast("room:announce:join", `${ws.name} joined the room.`);
-        if (this.pawns.length){
+        if (this.map !== null && this.showPawns){
             const pawn:Pawn = {
                 uid: randomUUID(),
                 x: 0,
@@ -147,8 +158,7 @@ class Room {
                 playerId: ws.id,
                 name: ws.name,
             };
-            this.pawns.push(pawn);
-            this.spawnPlayers(false);
+            this.dispatch(insert("pawns", ws.id, pawn));
         }
     }
 
@@ -162,14 +172,8 @@ class Room {
                 const op = set("players", ws.id, "active", false);
                 this.dispatch(op);
                 if (reason === "KICKED" || reason === "QUIT"){
-                    for (let i = 0; i < this.pawns.length; i++){
-                        if (this.pawns[i]?.playerId === ws.id){
-                            const op2 = del("pawns", this.pawns[i].uid);
-                            this.dispatch(op2);
-                            this.pawns.splice(i, 1);
-                            break;
-                        }
-                    }
+                    const op = del("pawns", ws.id);
+                    this.dispatch(op);
                 }
             }
             console.log(`Socket ${ws.id} left room ${this.code}`);
