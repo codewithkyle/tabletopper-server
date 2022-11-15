@@ -96,6 +96,7 @@ class Room {
     }
 
     public dispatch(op):void{
+        op.timestamp = new Date().getTime();
         logger.write(op, this.code);
         for (const socket in this.sockets){
             gm.send(this.sockets[socket], "room:op", op);
@@ -171,10 +172,6 @@ class Room {
             if (ws.id !== this.gmId){
                 const op = set("players", ws.id, "active", false);
                 this.dispatch(op);
-                if (reason === "KICKED" || reason === "QUIT"){
-                    const op = del("pawns", ws.id);
-                    this.dispatch(op);
-                }
             }
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
