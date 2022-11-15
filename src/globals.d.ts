@@ -45,4 +45,6 @@ export type Pawn = {
     token?: string|null,
     name: string,
     room: string,
+    hp?: number,
+    ac?: number,
 }

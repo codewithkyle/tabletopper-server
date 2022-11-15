@@ -61,10 +61,12 @@ class Room {
             const id = randomUUID();
             const pawn:Pawn = {
                 uid: id,
-                x: 0,
-                y: 0,
+                x: x,
+                y: y,
                 room: this.code,
                 name: name,
+                ac: ac,
+                hp: hp,
             };
             const op = insert("pawns", id, pawn);
             console.log(`Room ${this.code} is spawning an NPC named ${name}`);
@@ -72,13 +74,15 @@ class Room {
         }
     }
 
-    public spawnMonster({ index, x, y, name }){
+    public spawnMonster({ index, x, y, name, hp, ac }){
         if (this.map !== null){
             const id = randomUUID();
             const pawn:Pawn = {
                 uid: id,
-                x: 0,
-                y: 0,
+                x: x,
+                y: y,
+                hp: hp,
+                ac: ac,
                 room: this.code,
                 monsterId: index,
                 name: name,
