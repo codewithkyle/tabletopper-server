@@ -56,6 +56,22 @@ class Room {
         this.dispatch(op);
     }
 
+    public spawnNPC({ name, ac, hp, x, y }){
+        if (this.map !== null){
+            const id = randomUUID();
+            const pawn:Pawn = {
+                uid: id,
+                x: 0,
+                y: 0,
+                room: this.code,
+                name: name,
+            };
+            const op = insert("pawns", id, pawn);
+            console.log(`Room ${this.code} is spawning an NPC named ${name}`);
+            this.dispatch(op);
+        }
+    }
+
     public spawnMonster({ index, x, y, name }){
         if (this.map !== null){
             const id = randomUUID();

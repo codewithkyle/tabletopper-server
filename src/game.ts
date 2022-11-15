@@ -50,6 +50,13 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:tabletop:spawn:npc":
+                if (room){
+                    room.spawnNPC(data);
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:tabletop:spawn:monster":
                 if (room){
                     room.spawnMonster(data);
