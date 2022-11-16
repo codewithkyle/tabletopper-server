@@ -67,6 +67,16 @@ class Room {
                 name: name,
                 ac: ac,
                 hp: hp,
+                rings: {
+                    red: false,
+                    orange: false,
+                    blue: false,
+                    white: false,
+                    purple: false,
+                    yellow: false,
+                    pink: false,
+                    green: false,
+                },
             };
             const op = insert("pawns", id, pawn);
             console.log(`Room ${this.code} is spawning an NPC named ${name}`);
@@ -86,6 +96,16 @@ class Room {
                 room: this.code,
                 monsterId: index,
                 name: name,
+                rings: {
+                    red: false,
+                    orange: false,
+                    blue: false,
+                    white: false,
+                    purple: false,
+                    yellow: false,
+                    pink: false,
+                    green: false,
+                },
             };
             const op = insert("pawns", id, pawn);
             console.log(`Room ${this.code} is spawning a ${index}`);
@@ -106,6 +126,16 @@ class Room {
                     room: this.code,
                     playerId: id,
                     name: this.sockets[id].name,
+                    rings: {
+                        red: false,
+                        orange: false,
+                        blue: false,
+                        white: false,
+                        purple: false,
+                        yellow: false,
+                        pink: false,
+                        green: false,
+                    },
                 };
                 this.dispatch(insert("pawns", id, pawn));
             }
@@ -178,6 +208,16 @@ class Room {
                 room: this.code,
                 playerId: ws.id,
                 name: ws.name,
+                rings: {
+                    red: false,
+                    orange: false,
+                    blue: false,
+                    white: false,
+                    purple: false,
+                    yellow: false,
+                    pink: false,
+                    green: false,
+                },
             };
             this.dispatch(insert("pawns", ws.id, pawn));
         }

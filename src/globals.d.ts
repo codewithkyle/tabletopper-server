@@ -47,4 +47,14 @@ export type Pawn = {
     room: string,
     hp?: number,
     ac?: number,
+    rings: {
+        red: boolean,
+        orange: boolean,
+        blue: boolean,
+        white: boolean,
+        purple: boolean,
+        yellow: boolean,
+        pink: boolean,
+        green: boolean,
+    },
 }
