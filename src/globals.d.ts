@@ -57,4 +57,5 @@ export type Pawn = {
         pink: boolean,
         green: boolean,
     },
+    fullHP?: number,
 }

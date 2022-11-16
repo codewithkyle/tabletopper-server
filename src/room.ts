@@ -67,6 +67,7 @@ class Room {
                 name: name,
                 ac: ac,
                 hp: hp,
+                fullHP: hp,
                 rings: {
                     red: false,
                     orange: false,
@@ -96,6 +97,7 @@ class Room {
                 room: this.code,
                 monsterId: index,
                 name: name,
+                fullHP: hp,
                 rings: {
                     red: false,
                     orange: false,
