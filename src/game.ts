@@ -50,6 +50,13 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:announce:initiative":
+                if (room){
+                    room.announceInitiative(data);
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:tabletop:spawn:npc":
                 if (room){
                     room.spawnNPC(data);
@@ -175,7 +182,7 @@ class GameManager {
         do {
             code = GenerateCode();
         } while (code in this.rooms)
-        const room = new Room(code, uuid(), ws.id);
+        const room = new Room(code, ws.id);
         room.addSocket(ws);
         this.rooms[code] = room;
         ws.room = code;

@@ -5,7 +5,6 @@ import { set, batch, del, insert } from "./control-center.js";
 import {randomUUID} from "crypto";
 
 class Room {
-    public id: string;
     public code: string;
     public gmId: string;
     private sockets: {
@@ -20,15 +19,36 @@ class Room {
     };
     public showPawns: boolean;
 
-    constructor(code:string, id: string, gmId:string){
+    constructor(code:string, gmId:string){
         this.code = code;
-        this.id = id;
         this.gmId = gmId;
         this.sockets = {};
         this.locked = false;
         this.map = null;
         this.deadPlayers = {};
         this.showPawns = false;
+    }
+
+    public announceInitiative({ current, next }){
+        const op = set("games", this.code, "active_initiative", current.uid);
+        this.dispatch(op);
+        if (current?.playerId != null){
+            gm.send(this.sockets[current.playerId], "room:announce:initiative", {
+                title: "You're up!",
+                message: "It's your turn for combat. Good luck!",
+            });
+        }
+        if (next.playerId != null){
+            gm.send(this.sockets[next.playerId], "room:announce:initiative", {
+                title: "You're on deck.",
+                message: "Start planning your turn now. You're next in the initiative order.",
+            });
+        } else {
+            this.broadcast("room:announce:initiative", {
+                title: `${next.name} is on deck.`,
+                message: `${next.name} is next in the initiative order.`,
+            });
+        }
     }
     
     public kickPlayer(id:string):void{
@@ -170,8 +190,7 @@ class Room {
             delete this.deadPlayers[ws.id];
             console.log(`Socket ${ws.id} reconnected to ${this.code}`);
             gm.send(ws, "room:join", {
-                code: this.code,
-                id: this.id,
+                uid: this.code,
             });
             this.broadcast("room:announce:reconnect", `${ws.name} has returned.`);
             if (ws.id !== this.gmId){
@@ -187,8 +206,7 @@ class Room {
     public addSocket(ws:Socket, data = null):void{
         this.sockets[ws.id] = ws;
         gm.send(ws, "room:join", {
-            code: this.code,
-            id: this.id,
+            uid: this.code,
         });
         if (data?.token){
             this.dispatch(data.token);
