@@ -76,7 +76,7 @@ class Room {
         this.dispatch(op);
     }
 
-    public spawnNPC({ name, ac, hp, x, y }){
+    public spawnNPC({ name, ac, hp, x, y, size }){
         if (this.map !== null){
             const id = randomUUID();
             const pawn:Pawn = {
@@ -88,6 +88,7 @@ class Room {
                 ac: ac,
                 hp: hp,
                 fullHP: hp,
+                size: size,
                 rings: {
                     red: false,
                     orange: false,
@@ -105,7 +106,7 @@ class Room {
         }
     }
 
-    public spawnMonster({ index, x, y, name, hp, ac }){
+    public spawnMonster({ index, x, y, name, hp, ac, size }){
         if (this.map !== null){
             const id = randomUUID();
             const pawn:Pawn = {
@@ -118,6 +119,7 @@ class Room {
                 monsterId: index,
                 name: name,
                 fullHP: hp,
+                size: size,
                 rings: {
                     red: false,
                     orange: false,

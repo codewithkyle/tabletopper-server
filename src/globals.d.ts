@@ -58,4 +58,5 @@ export type Pawn = {
         green: boolean,
     },
     fullHP?: number,
+    size?: string|null,
 }
