@@ -60,13 +60,15 @@ class Room {
 
     public async clearMap():Promise<void>{
         this.broadcast("room:tabletop:clear");
-        await logger.delete(this.code);
-        await logger.touch(this.code);
+        //await logger.delete(this.code);
+        //await logger.touch(this.code);
         this.map = null;
         this.showPawns = false;
         const op = set("games", this.code, "map", null);
         const op2 = set("games", this.code, "players", []);
-        const ops = batch("games", this.code, [op, op2]);
+        const op3 = set("games", this.code, "initiative", []);
+        const op4 = set("games", this.code, "active_initiative", null);
+        const ops = batch("games", this.code, [op, op2, op3, op4]);
         this.dispatch(ops);
     }
 
