@@ -177,17 +177,17 @@ class GameManager {
         });
     }
 
-    public createRoom(ws:Socket):void{
-        let code;
+    public async createRoom(ws:Socket):Promise<void>{
+        let code:string;
         do {
             code = GenerateCode();
         } while (code in this.rooms)
         const room = new Room(code, ws.id);
-        room.addSocket(ws);
         this.rooms[code] = room;
         ws.room = code;
+        await logger.touch(code);
         console.log(`Socket ${ws.id} created room ${code}`);
-        logger.touch(code);
+        room.addSocket(ws);
     }
 
     public removeRoom(code:string):void{
