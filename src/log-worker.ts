@@ -12,7 +12,8 @@ parentPort.on("message", async (e) => {
                 parentPort.postMessage(uid);
                 break;
             case "append":
-                await writeFile(location, data + "\n", { encoding:"utf-8", flag: "a"});
+                await writeFile(location, data + "\n", { encoding:"utf-8", flag: "a" });
+                parentPort.postMessage(uid);
                 break;
             case "delete":
                 await unlink(location);
