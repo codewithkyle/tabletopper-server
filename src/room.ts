@@ -11,7 +11,6 @@ class Room {
         [id:string]: Socket,
     };
     public locked:boolean;
-    private map: string;
     private deadPlayers: {
         [id:string]: {
             name: string,
@@ -24,7 +23,6 @@ class Room {
         this.gmId = gmId;
         this.sockets = {};
         this.locked = false;
-        this.map = null;
         this.deadPlayers = {};
         this.showPawns = false;
     }
@@ -66,7 +64,6 @@ class Room {
         this.broadcast("room:tabletop:clear");
         //await logger.delete(this.code);
         //await logger.touch(this.code);
-        this.map = null;
         this.showPawns = false;
         const op = set("games", this.code, "map", null);
         const op2 = set("games", this.code, "players", []);
@@ -76,71 +73,61 @@ class Room {
         await this.dispatch(ops);
     }
 
-    public async setMap(map:string):Promise<void>{
-        this.map = map;
-        const op = set("games", this.code, "map", map);
+    public async spawnNPC({ name, ac, hp, x, y, size }):Promise<void>{
+        const id = randomUUID();
+        const pawn:Pawn = {
+            uid: id,
+            x: x,
+            y: y,
+            room: this.code,
+            name: name,
+            ac: ac,
+            hp: hp,
+            fullHP: hp,
+            size: size,
+            rings: {
+                red: false,
+                orange: false,
+                blue: false,
+                white: false,
+                purple: false,
+                yellow: false,
+                pink: false,
+                green: false,
+            },
+        };
+        const op = insert("pawns", id, pawn);
+        console.log(`Room ${this.code} is spawning an NPC named ${name}`);
         await this.dispatch(op);
     }
 
-    public async spawnNPC({ name, ac, hp, x, y, size }):Promise<void>{
-        if (this.map !== null){
-            const id = randomUUID();
-            const pawn:Pawn = {
-                uid: id,
-                x: x,
-                y: y,
-                room: this.code,
-                name: name,
-                ac: ac,
-                hp: hp,
-                fullHP: hp,
-                size: size,
-                rings: {
-                    red: false,
-                    orange: false,
-                    blue: false,
-                    white: false,
-                    purple: false,
-                    yellow: false,
-                    pink: false,
-                    green: false,
-                },
-            };
-            const op = insert("pawns", id, pawn);
-            console.log(`Room ${this.code} is spawning an NPC named ${name}`);
-            await this.dispatch(op);
-        }
-    }
-
     public async spawnMonster({ index, x, y, name, hp, ac, size }):Promise<void>{
-        if (this.map !== null){
-            const id = randomUUID();
-            const pawn:Pawn = {
-                uid: id,
-                x: x,
-                y: y,
-                hp: hp,
-                ac: ac,
-                room: this.code,
-                monsterId: index,
-                name: name,
-                fullHP: hp,
-                size: size,
-                rings: {
-                    red: false,
-                    orange: false,
-                    blue: false,
-                    white: false,
-                    purple: false,
-                    yellow: false,
-                    pink: false,
-                    green: false,
-                },
-            };
-            const op = insert("pawns", id, pawn);
-            console.log(`Room ${this.code} is spawning a ${index}`);
-            await this.dispatch(op);
-        }
+        const id = randomUUID();
+        const pawn:Pawn = {
+            uid: id,
+            x: x,
+            y: y,
+            hp: hp,
+            ac: ac,
+            room: this.code,
+            monsterId: index,
+            name: name,
+            fullHP: hp,
+            size: size,
+            rings: {
+                red: false,
+                orange: false,
+                blue: false,
+                white: false,
+                purple: false,
+                yellow: false,
+                pink: false,
+                green: false,
+            },
+        };
+        const op = insert("pawns", id, pawn);
+        console.log(`Room ${this.code} is spawning a ${index}`);
+        await this.dispatch(op);
     }
 
     public async spawnPlayers():Promise<void>{
@@ -225,7 +212,7 @@ class Room {
         }
         console.log(`Socket ${ws.id} joined room ${this.code}`);
         this.broadcast("room:announce:join", `${ws.name} joined the room.`);
-        if (this.map !== null && this.showPawns){
+        if (this.showPawns){
             const pawn:Pawn = {
                 uid: randomUUID(),
                 x: 0,

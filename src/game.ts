@@ -92,13 +92,6 @@ class GameManager {
                     this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
                 }
                 break;
-            case "room:tabletop:map:load":
-                if (room){
-                    room.setMap(data);
-                } else {
-                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
-                }
-                break;
             case "room:tabletop:spawn:players":
                 if (room){
                     room.spawnPlayers();
