@@ -29,6 +29,10 @@ class Room {
         this.showPawns = false;
     }
 
+    public ping({ x, y}):void{
+        this.broadcast("room:tabletop:ping", { x, y });
+    }
+
     public async announceInitiative({ current, next }):Promise<void>{
         const op = set("games", this.code, "active_initiative", current.uid);
         await this.dispatch(op);
