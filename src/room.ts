@@ -19,6 +19,9 @@ class Room {
         }
     };
     public showPawns: boolean;
+    private mutedPlayers: {
+        [id:string]: null,
+    };
 
     constructor(code:string, gmId:string){
         this.code = code;
@@ -27,9 +30,19 @@ class Room {
         this.locked = false;
         this.deadPlayers = {};
         this.showPawns = false;
+        this.mutePlayer = {};
     }
 
-    public ping(data):void{
+    public mutePlayer({ playerId, muted }): void{
+        if (muted){
+            this.mutePlayer[playerId] = null;
+        } else if (!muted && playerId in this.mutePlayer) {
+            delete this.mutePlayer[playerId];
+        }
+    }
+
+    public ping(data, ws):void{
+        if (ws.id in this.mutePlayer) return;
         this.broadcast("room:tabletop:ping", data);
     }
 

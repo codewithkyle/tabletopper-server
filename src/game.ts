@@ -50,9 +50,16 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:player:mute":
+                if (room){
+                    room.mutePlayer(data);
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:tabletop:ping":
                 if (room){
-                    room.ping(data);
+                    room.ping(data, ws);
                 } else {
                     this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
                 }
