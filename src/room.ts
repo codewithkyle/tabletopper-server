@@ -34,12 +34,15 @@ class Room {
     }
 
     public mutePlayer({ playerId }): void{
+        let muted = false;
         if (playerId in this.mutePlayer){
             delete this.mutePlayer[playerId];
         } else {
+            muted = true;
             this.mutePlayer[playerId] = null;
         }
-        // TODO: notify user and admin
+        gm.send(this.sockets[playerId], "room:announce:snackbar", `The Game Master has ${muted ? "muted" : "unmuted"} your pings.`);
+        gm.send(this.sockets[this.gmId], "room:announce:snackbar", `${this.sockets[playerId].name} is now ${muted ? "muted" : "unmuted"}.`);
     }
 
     public ping(data, ws):void{
