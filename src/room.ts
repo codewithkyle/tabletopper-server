@@ -30,7 +30,7 @@ class Room {
         this.locked = false;
         this.deadPlayers = {};
         this.showPawns = false;
-        this.mutePlayer = {};
+        this.mutedPlayers = {};
     }
 
     public mutePlayer({ playerId }): void{
@@ -88,7 +88,8 @@ class Room {
         const op2 = set("games", this.code, "players", []);
         const op3 = set("games", this.code, "initiative", []);
         const op4 = set("games", this.code, "active_initiative", null);
-        const ops = batch("games", this.code, [op, op2, op3, op4]);
+        const op5 = set("games", this.code, "render_grid", false);
+        const ops = batch("games", this.code, [op, op2, op3, op4, op5]);
         await this.dispatch(ops);
     }
 
