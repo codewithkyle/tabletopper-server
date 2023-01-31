@@ -4,6 +4,8 @@ import type { ExitReason, Socket, Pawn } from "./globals";
 import { set, batch, del, insert } from "./control-center.js";
 import {randomUUID} from "crypto";
 
+const COLORS = ["grey", "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "light-blue", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"];
+
 class Room {
     public code: string;
     public gmId: string;
@@ -27,8 +29,8 @@ class Room {
         this.showPawns = false;
     }
 
-    public ping({ x, y}):void{
-        this.broadcast("room:tabletop:ping", { x, y });
+    public ping(data):void{
+        this.broadcast("room:tabletop:ping", data);
     }
 
     public async announceInitiative({ current, next }):Promise<void>{
