@@ -33,12 +33,13 @@ class Room {
         this.mutePlayer = {};
     }
 
-    public mutePlayer({ playerId, muted }): void{
-        if (muted){
-            this.mutePlayer[playerId] = null;
-        } else if (!muted && playerId in this.mutePlayer) {
+    public mutePlayer({ playerId }): void{
+        if (playerId in this.mutePlayer){
             delete this.mutePlayer[playerId];
+        } else {
+            this.mutePlayer[playerId] = null;
         }
+        // TODO: notify user and admin
     }
 
     public ping(data, ws):void{
