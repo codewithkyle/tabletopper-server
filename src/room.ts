@@ -4,6 +4,8 @@ import type { ExitReason, Socket, Pawn } from "./globals";
 import { set, batch, del, insert } from "./control-center.js";
 import {randomUUID} from "crypto";
 
+const COLORS = ["grey", "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "light-blue", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"];
+
 class Room {
     public code: string;
     public gmId: string;
@@ -17,6 +19,9 @@ class Room {
         }
     };
     public showPawns: boolean;
+    private mutedPlayers: {
+        [id:string]: null,
+    };
 
     constructor(code:string, gmId:string){
         this.code = code;
@@ -25,10 +30,24 @@ class Room {
         this.locked = false;
         this.deadPlayers = {};
         this.showPawns = false;
+        this.mutedPlayers = {};
     }
 
-    public ping({ x, y}):void{
-        this.broadcast("room:tabletop:ping", { x, y });
+    public mutePlayer({ playerId }): void{
+        let muted = false;
+        if (playerId in this.mutePlayer){
+            delete this.mutePlayer[playerId];
+        } else {
+            muted = true;
+            this.mutePlayer[playerId] = null;
+        }
+        gm.send(this.sockets[playerId], "room:announce:snackbar", `The Game Master has ${muted ? "muted" : "unmuted"} your pings.`);
+        gm.send(this.sockets[this.gmId], "room:announce:snackbar", `${this.sockets[playerId].name} is now ${muted ? "muted" : "unmuted"}.`);
+    }
+
+    public ping(data, ws):void{
+        if (ws.id in this.mutePlayer) return;
+        this.broadcast("room:tabletop:ping", data);
     }
 
     public async announceInitiative({ current, next }):Promise<void>{
@@ -69,7 +88,8 @@ class Room {
         const op2 = set("games", this.code, "players", []);
         const op3 = set("games", this.code, "initiative", []);
         const op4 = set("games", this.code, "active_initiative", null);
-        const ops = batch("games", this.code, [op, op2, op3, op4]);
+        const op5 = set("games", this.code, "render_grid", false);
+        const ops = batch("games", this.code, [op, op2, op3, op4, op5]);
         await this.dispatch(ops);
     }
 
