@@ -50,6 +50,13 @@ class GameManager {
         const { type, data } = message;
         const room = this.rooms?.[ws?.room] ?? null;
         switch (type){
+            case "room:player:rename":
+                if (room){
+                    room.renamePlayer(data);
+                } else {
+                    this.error(ws, "Action Failed", `Room ${ws.room} is no longer available.`);
+                }
+                break;
             case "room:player:mute":
                 if (room){
                     room.mutePlayer(data);

@@ -33,6 +33,12 @@ class Room {
         this.mutedPlayers = {};
     }
 
+    public renamePlayer({ playerId, name }):void{
+        if (playerId in this.sockets){
+            this.sockets[playerId].name = name;
+        }
+    }
+
     public mutePlayer({ playerId }): void{
         let muted = false;
         if (playerId in this.mutePlayer){
