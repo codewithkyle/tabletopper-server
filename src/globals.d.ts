@@ -5,7 +5,7 @@ export type Socket = {
     name: string,
 };
 
-export type OP = "INSERT" | "DELETE" | "SET" | "UNSET" | "BATCH";
+export type OP = "INSERT" | "DELETE" | "SET" | "UNSET";
 
 export interface OPCode{
     uid: string,
@@ -28,10 +28,6 @@ export interface Set extends OPCode{
 
 export interface Unset extends OPCode{
     keypath: string,
-}
-
-export interface Batch extends OPCode{
-    ops: Array<OPCode>,
 }
 
 export type ExitReason = "UNKNOWN" | "KICKED" | "DC" | "QUIT";

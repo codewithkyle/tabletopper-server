@@ -1,7 +1,7 @@
 import logger from "./lumberjack.js";
 import gm from "./game.js";
 import type { ExitReason, Socket, Pawn } from "./globals";
-import { set, batch, del, insert } from "./control-center.js";
+import { set, del, insert } from "./control-center.js";
 import {randomUUID} from "crypto";
 
 const COLORS = ["grey", "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "light-blue", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"];
@@ -91,12 +91,15 @@ class Room {
         //await logger.touch(this.code);
         this.showPawns = false;
         const op = set("games", this.code, "map", null);
+        await this.dispatch(op);
         const op2 = set("games", this.code, "players", []);
+        await this.dispatch(op2);
         const op3 = set("games", this.code, "initiative", []);
+        await this.dispatch(op3);
         const op4 = set("games", this.code, "active_initiative", null);
+        await this.dispatch(op4);
         const op5 = set("games", this.code, "render_grid", false);
-        const ops = batch("games", this.code, [op, op2, op3, op4, op5]);
-        await this.dispatch(ops);
+        await this.dispatch(op5);
     }
 
     public async spawnNPC({ name, ac, hp, x, y, size }):Promise<void>{
@@ -225,7 +228,6 @@ class Room {
     }
 
     public async addSocket(ws:Socket, data = null):Promise<void>{
-        this.sockets[ws.id] = ws;
         if (data?.token){
             await this.dispatch(data.token);
         }
@@ -259,6 +261,7 @@ class Room {
             };
             await this.dispatch(insert("pawns", ws.id, pawn));
         }
+        this.sockets[ws.id] = ws;
         gm.send(ws, "room:join", {
             uid: this.code,
         });

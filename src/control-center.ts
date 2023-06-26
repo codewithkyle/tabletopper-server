@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import type { Insert, Delete, Set, Unset, Batch, OPCode } from "globals";
+import type { Insert, Delete, Set, Unset, OPCode } from "globals";
 
 export function insert(table:string, key:string, value:any):Insert{
     return {
@@ -45,13 +45,3 @@ export function unset(table:string, key:string, keypath:string):Unset{
     };
 }
 
-export function batch(table:string, key:string, ops:Array<OPCode>):Batch{
-    return {
-        table: table,
-        uid: randomUUID(),
-        op: "BATCH",
-        ops: ops,
-        timestamp: new Date().getTime(),
-        key: key,
-    };
-}
