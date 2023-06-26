@@ -276,14 +276,18 @@ class Room {
             }
             console.log(`Socket ${ws.id} left room ${this.code}`);
         }
+        const op = del("pawns", ws.id);
         switch (reason){
             case "QUIT":
+                await this.dispatch(op);
                 this.broadcast("room:announce:quit", `${ws.name} has left the room.`);
                 break;
             case "KICKED":
+                await this.dispatch(op);
                 this.broadcast("room:announce:kick", `${ws.name} has been kicked from the room.`);
                 break;
             case "DC":
+                await this.dispatch(op);
                 this.broadcast("room:announce:dc", `${ws.name} was disconnected.`);
                 break;
             default:
